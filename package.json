@@ -1,0 +1,30 @@
+{
+  "name": "scv",
+  "version": "0.1.0",
+  "description": "In the Rear with the Gear!",
+  "main": "index.js",
+  "scripts": {
+    "prepublish": "make",
+    "test": "make test",
+    "postinstall": "npm rebuild"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/chakrit/scv"
+  },
+  "keywords": [
+    "SCV",
+    "automation",
+    "deployment",
+    "ssh"
+  ],
+  "author": "Chakrit Wichian <service@chakrit.net> (http://chakrit.net)",
+  "license": "BSD",
+  "devDependencies": {
+    "coffee-script": "~1.4.0",
+    "mocha-istanbul": "~0.1.0",
+    "mocha": "~1.8.1",
+    "istanbul": "~0.1.27",
+    "plato": "~0.4.3"
+  }
+}

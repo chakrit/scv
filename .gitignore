@@ -1,0 +1,14 @@
+
+# node.js
+node_modules
+npm-debug.log
+v8.log
+
+# build artifacts
+lib/
+lib-cov/
+html-report/
+log/
+doc/
+tmp/
+
