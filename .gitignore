@@ -7,8 +7,10 @@ v8.log
 # build artifacts
 lib/
 lib-cov/
+src-cov/
 html-report/
 log/
 doc/
 tmp/
+coverage.*
 
