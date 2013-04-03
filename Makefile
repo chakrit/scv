@@ -1,31 +1,29 @@
 
-BIN := $(shell pwd)/node_modules/.bin
-LOG := $(shell pwd)/log
+BIN  := $(shell pwd)/node_modules/.bin
+LOG  := $(shell pwd)/log
 
-GLOBALS  := __coverage__,buffertools,SlowBuffer,events,util,task
+GLOBALS  := "__coverage__,_\$$jscoverage,buffertools,SlowBuffer,events,util,task"
 TEST_ENV := test
 
 # Project files definition
 TEST_FILES := $(wildcard test/**/*.coffee) $(wildcard test/*.coffee)
 SRC_FILES  := $(wildcard src/**/*.coffee) $(wildcard src/*.coffee)
 LIB_FILES  := $(SRC_FILES:src/%.coffee=lib/%.js)
-COV_FILES  := $(LIB_FILES:lib/%.js=lib-cov/%.js)
-
-INDEX_FILE = index.js
+COV_FILES  := $(SRC_FILES:src/%.coffee=src-cov/%.js)
 
 # Test parameters so we can configure these via make
-TEST_TIMEOUT   = 100
-TEST_REPORTER  = list
-TDD_REPORTER   = min
-COVER_REPORTER = mocha-istanbul
+TEST_TIMEOUT  = 100
+TEST_REPORTER = list
+TDD_REPORTER  = min
 
 # Command-line tools options
-MOCHA_OPTS       = --timeout $(TEST_TIMEOUT) --reporter $(TEST_REPORTER) --globals $(GLOBALS) --compilers coffee:coffee-script
-MOCHA_TDD_OPTS   = $(MOCHA_OPTS) --watch --reporter $(TDD_REPORTER)
-MOCHA_COVER_OPTS = $(MOCHA_OPTS) --reporter $(COVER_REPORTER)
-COFFEE_OPTS      = --bare --compile
-ISTANBUL_OPTS    = instrument --variable global.__coverage__ --no-compact
-PLATO_OPTS       = -d html-report/
+MOCHA_OPTS      = --timeout $(TEST_TIMEOUT) \
+                  --reporter $(TEST_REPORTER) \
+                  --globals $(GLOBALS) \
+                  --compilers coffee:coffee-script
+SUPERVISOR_OPTS = -q -n exit -e 'coffee|litcoffee|js|node' \
+                  -i '.git,node_modules,public,script,src-cov,html-report'
+COFFEE_OPTS     = --bare --compile
 
 
 default: node_modules all
@@ -48,15 +46,40 @@ lib-cov/%.js: lib/%.js | node_modules
 # Testing
 test: node_modules
 	NODE_ENV=$(TEST_ENV) $(BIN)/mocha $(MOCHA_OPTS) $(TEST_FILES)
-tdd: node_modules
-	NODE_ENV=$(TEST_ENV) $(BIN)/mocha $(MOCHA_TDD_OPTS) $(TEST_FILES)
+
+tdd: TEST_REPORTER=$(TDD_REPORTER)
+tdd:
+	NODE_ENV=$(TEST_ENV) $(BIN)/supervisor $(SUPERVISOR_OPTS) \
+	  -x $(BIN)/mocha -- $(MOCHA_OPTS) $(TEST_FILES)
+
+
+# Code coverage
+src-cov: $(SRC_FILES)
+	NODE_ENV=$(TEST_ENV) $(BIN)/coffeeCoverage ./src ./src-cov
+
+travis-cov: TEST_REPORTER=travis-cov
+travis-cov: src-cov
+	NODE_ENV=$(TEST_ENV) SCV_COVER=1 $(BIN)/mocha $(MOCHA_OPTS)
+
+html-cov: coverage.html
+coverage.html: TEST_REPORTER=html-cov
+coverage.html: src-cov
+	NODE_ENV=$(TEST_ENV) SCV_COVER=1 $(BIN)/mocha $(MOCHA_OPTS) | tee coverage.html
+
+json-cov: coverage.json
+coverage.json: TEST_REPORTER=json-cov
+coverage.json: src-cov
+	NODE_ENV=$(TEST_ENV) SCV_COVER=1 $(BIN)/mocha $(MOCHA_OPTS) | tee coverage.json
 
 
 # Cleans
 clean:
 	-rm -Rf lib/
+	-rm -Rf src-cov/
 	-rm -Rf lib-cov/
 	-rm -Rf html-report/
+	-rm coverage.html
+	-rm coverage.json
 
 
 .PHONY: default all test tdd clean
