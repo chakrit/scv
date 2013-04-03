@@ -2,30 +2,30 @@
 BIN := $(shell pwd)/node_modules/.bin
 LOG := $(shell pwd)/log
 
-GLOBALS := __coverage__,buffertools,SlowBuffer,events,util,task
+GLOBALS  := __coverage__,buffertools,SlowBuffer,events,util,task
 TEST_ENV := test
 
 # Project files definition
 TEST_FILES := $(wildcard test/**/*.coffee) $(wildcard test/*.coffee)
-SRC_FILES := $(wildcard src/**/*.coffee)
-LIB_FILES := $(SRC_FILES:src/%.coffee=lib/%.js)
-COV_FILES := $(LIB_FILES:lib/%.js=lib-cov/%.js)
+SRC_FILES  := $(wildcard src/**/*.coffee) $(wildcard src/*.coffee)
+LIB_FILES  := $(SRC_FILES:src/%.coffee=lib/%.js)
+COV_FILES  := $(LIB_FILES:lib/%.js=lib-cov/%.js)
 
 INDEX_FILE = index.js
 
 # Test parameters so we can configure these via make
-TEST_TIMEOUT = 100
-TEST_REPORTER = list
-TDD_REPORTER = min
+TEST_TIMEOUT   = 100
+TEST_REPORTER  = list
+TDD_REPORTER   = min
 COVER_REPORTER = mocha-istanbul
 
 # Command-line tools options
-MOCHA_OPTS = --timeout $(TEST_TIMEOUT) --reporter $(TEST_REPORTER) --globals $(GLOBALS) --compilers coffee:coffee-script
-MOCHA_TDD_OPTS = $(MOCHA_OPTS) --watch --reporter $(TDD_REPORTER)
+MOCHA_OPTS       = --timeout $(TEST_TIMEOUT) --reporter $(TEST_REPORTER) --globals $(GLOBALS) --compilers coffee:coffee-script
+MOCHA_TDD_OPTS   = $(MOCHA_OPTS) --watch --reporter $(TDD_REPORTER)
 MOCHA_COVER_OPTS = $(MOCHA_OPTS) --reporter $(COVER_REPORTER)
-COFFEE_OPTS = --bare --compile
-ISTANBUL_OPTS = instrument --variable global.__coverage__ --no-compact
-PLATO_OPTS = -d html-report/
+COFFEE_OPTS      = --bare --compile
+ISTANBUL_OPTS    = instrument --variable global.__coverage__ --no-compact
+PLATO_OPTS       = -d html-report/
 
 
 default: node_modules all
