@@ -30,19 +30,19 @@ PLATO_OPTS       = -d html-report/
 
 default: node_modules all
 
+all: $(LIB_FILES)
+
 node_modules:
 	npm install
 
 
 # File transformations
-lib/%.js: node_modules src/%.coffee
+lib/%.js: src/%.coffee | node_modules
 	$(BIN)/coffee $(COFFEE_OPTS) --output $(@D) $<
 
-lib-cov/%.js: node_modules lib/%.js
+lib-cov/%.js: lib/%.js | node_modules
 	@mkdir -p $(@D)
 	$(BIN)/istanbul $(ISTANBUL_OPTS) --output $@ $<
-
-all: $(LIB_FILES)
 
 
 # Testing
@@ -52,16 +52,6 @@ tdd: node_modules
 	NODE_ENV=$(TEST_ENV) $(BIN)/mocha $(MOCHA_TDD_OPTS) $(TEST_FILES)
 
 
-# Code instrumentation
-instrument: $(COV_FILES)
-
-cover: instrument
-	NODE_ENV=$(TEST_ENV) COVER=1 $(BIN)/mocha $(MOCHA_COVER_OPTS) $(TEST_FILES)
-
-complex: all
-	$(BIN)/plato $(PLATO_OPTS) $(LIB_FILES)
-
-
 # Cleans
 clean:
 	-rm -Rf lib/
@@ -69,5 +59,5 @@ clean:
 	-rm -Rf html-report/
 
 
-.PHONY: debug default all test tdd clean instrument cover complex
+.PHONY: default all test tdd clean
 
